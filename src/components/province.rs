@@ -1,42 +1,52 @@
-use std::fmt;
-use std::error::Error;
+use dorp::{Id, IdManager, IdType, Vec4, OptErr, SyncData, DorpErr};
 
-use dorp::{Id, Vec4, OptErr, WorldErr};
-
-use core::{WWorld, WEntityErr};
+use core::{WWorld};
 
 #[derive(Debug)]
 pub struct Province {
     chunks: Vec<Id>,
-    color: Vec4,
+    color_id: Id,
     dirty: bool,
 }
 
 impl Province {
-    pub fn new(color: Vec4) -> Province {
+    pub fn new(manager: &mut IdManager, color_id: Id) -> Province {
         Province {
             chunks: vec!(),
-            color: color,
+            color_id: color_id,
             dirty: false,
         }
     }
 
-    pub fn tick_mut(&mut self, world: &mut WWorld) -> Result<(), ProvinceErr> {
+    pub fn new_with_color(manager: &mut IdManager, sync_data: &mut SyncData, color: Vec4) -> Province {
+        let id = Id::new(manager, IdType::Color);
+        sync_data.set_vec4(id, color);
+        Province {
+            chunks: vec!(),
+            color_id: id,
+            dirty: false,
+        }
+    }
+
+    pub fn tick_mut(&mut self, world: &mut WWorld, sync_data: &mut SyncData) -> Result<(), DorpErr> {
         if self.dirty {
             self.dirty = false;
             for chunk_id in self.chunks.iter() {
                 match world.get_mut_entity_by_id(*chunk_id) {
                     OptErr::Full(chunk_entity) => {
-                        match chunk_entity.get_mut_chunk() {
-                            OptErr::Full(chunk) => {
-
+                        match chunk_entity.get_mut_renderable() {
+                            OptErr::Full(renderable) => match renderable.get_mut_solid_color() {
+                                Some(renderable) => {
+                                    renderable.set_color_id(self.color_id);
+                                },
+                                None => return Err(DorpErr::Base("Renderable Get Mut Solid Color was none")),
                             },
-                            OptErr::Empty => return Err(ProvinceErr::Get("Chunk Entity Get Mut Chunk")),
-                            OptErr::Error(err) => return Err(ProvinceErr::WEntity("Chunk Entity Get Mut Chunk", err)),
+                            OptErr::Empty => return Err(DorpErr::Base("Chunk Entity Get Mut Renderable was none")),
+                            OptErr::Error(err) => return Err(DorpErr::Dorp("Chunk Entity Get Mut Renderable", Box::new(err))),
                         }
                     },
-                    OptErr::Empty => return Err(ProvinceErr::Get("World Get Mut Entity by Id Chunk")),
-                    OptErr::Error(err) => return Err(ProvinceErr::World("World Get Mut Entity By Id Chunk", err)),
+                    OptErr::Empty => return Err(DorpErr::Base("World Get Mut Entity by Id Chunk was none")),
+                    OptErr::Error(err) => return Err(DorpErr::Dorp("World Get Mut Entity By Id Chunk", Box::new(err))),
                 }
             }
         }
@@ -47,35 +57,8 @@ impl Province {
         self.chunks.push(chunk);
         self.dirty = true;
     }
-}
 
-#[derive(Debug)]
-pub enum ProvinceErr {
-    World(&'static str, WorldErr),
-    WEntity(&'static str, WEntityErr),
-    // Named(&'static str, NamedErr),
-
-    Get(&'static str),
-}
-
-impl fmt::Display for ProvinceErr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            ProvinceErr::World(_, ref err) => err.fmt(f),
-            ProvinceErr::WEntity(_, ref err) => err.fmt(f),
-            // ProvinceErr::Named(_, ref err) => err.fmt(f),
-            ProvinceErr::Get(_) => write!(f, "Get was None"),
-        }
-    }
-}
-
-impl Error for ProvinceErr {
-    fn description(&self) -> &str {
-        match *self {
-            ProvinceErr::World(_, ref err) => err.description(),
-            ProvinceErr::WEntity(_, ref err) => err.description(),
-            // ProvinceErr::Named(_, ref err) => err.description(),
-            ProvinceErr::Get(_) => "Get was None",
-        }
+    pub fn get_color_id(&self) -> Id {
+        self.color_id
     }
 }
