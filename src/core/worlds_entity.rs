@@ -105,6 +105,11 @@ impl WEntity {
 
 impl Entity<WEntity> for WEntity {
     fn tick(&self, tick_count: TickCount, delta_time: f64, world: Arc<WWorld>) -> Result<(), DorpErr> {
+        if let Some(chunk) = self.chunk.as_ref() {
+            if let Err(err) = chunk.tick(world) {
+                return Err(DorpErr::Dorp("Chunk Tick World", Box::new(err)));
+            }
+        }
         Ok(())
     }
 
@@ -116,6 +121,11 @@ impl Entity<WEntity> for WEntity {
         if let Some(scene) = self.scene.as_mut() {
             if let Err(err) = scene.tick_mut(id, manager, world, sync_data) {
                 return Err(DorpErr::Dorp("Scene Tick Mut Id Manager World", Box::new(err)));
+            }
+        }
+        if let Some(chunk) = self.chunk.as_mut() {
+            if let Err(err) = chunk.tick_mut() {
+                return Err(DorpErr::Dorp("Chunk Tick Mut", Box::new(err)));
             }
         }
         if let Some(province) = self.province.as_mut() {

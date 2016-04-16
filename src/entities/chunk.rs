@@ -27,7 +27,11 @@ pub fn new_chunk(manager: &mut IdManager, renderable: &Renderable, zoom: Vec3, l
     let mut transform = Transform::new();
     transform.set_position(Vec3::from([location.get_x() as f32, location.get_y() as f32, 0.0]) * zoom);
     transform.set_scalation(zoom);
-    let chunk = Chunk::new(id, province_id, province);
+    let mut chunk = Chunk::new(id, province_id, province);
+    chunk.add_neighbor_coords(WCoords::new(location.get_x() + 1, location.get_y()));
+    chunk.add_neighbor_coords(WCoords::new(location.get_x() - 1, location.get_y()));
+    chunk.add_neighbor_coords(WCoords::new(location.get_x(), location.get_y() + 1));
+    chunk.add_neighbor_coords(WCoords::new(location.get_x(), location.get_y() - 1));
     Ok(
         WEntity::new(id)
         .with_renderable(renderable)

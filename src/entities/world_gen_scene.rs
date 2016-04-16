@@ -28,32 +28,17 @@ pub fn new_world_gen_scene(manager: &mut IdManager) -> WEntity {
         };
         let mut coords = WCoords::new(0, 0);
         let province_count = 1;
+        let province_size = 3;
         for _ in 0..province_count {
             let mut province = new_province(Vec4::from([rng.gen_range::<f32>(0.0, 1.0), rng.gen_range::<f32>(0.0, 1.0), rng.gen_range::<f32>(0.0, 1.0), 1.0]), manager, sync_data);
-            {
-                let overseer_entity = match world.get_entity_by_id(overseer_id) {
-                    Some(overseer_entity) => overseer_entity,
-                    None => return Err(DorpErr::Base("World Get Entity by id overseer id was none")),
+            for _ in 0..province_size {
+                let chunk_entity = match new_chunk(manager, &chunk_renderable, zoom, &coords, &mut province, world) {
+                    Ok(chunk) => chunk,
+                    Err(err) => return Err(DorpErr::Dorp("New Chunk", Box::new(err))),
                 };
-                let wmap = match overseer_entity.get_wmap() {
-                    Some(wmap) => wmap,
-                    None => return Err(DorpErr::Base("Overseer entity get wmap was none")),
-                };
-                while wmap.get(coords.get_x(), coords.get_y()).is_some() {
-                    coords = match rng.gen_range::<u8>(0, 4) {
-                        0 => WCoords::new(coords.get_x() + 1, coords.get_y()),
-                        1 => WCoords::new(coords.get_x() - 1, coords.get_y()),
-                        2 => WCoords::new(coords.get_x(), coords.get_y() + 1),
-                        3 => WCoords::new(coords.get_x(), coords.get_y() - 1),
-                        _ => return Err(DorpErr::Base("Problem with rng")),
-                    }
-                }
+                world.add_entity(chunk_entity);
             }
-            let chunk = match new_chunk(manager, &chunk_renderable, zoom, &coords, &mut province) {
-                Ok(chunk) => chunk,
-                Err(err) => return Err(DorpErr::Dorp("New Chunk", Box::new(err))),
-            };
-            world.add_entity(chunk);
+
         }
         println!("World Gen Scene Loaded");
         Ok(())
