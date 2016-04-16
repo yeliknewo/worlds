@@ -40,19 +40,13 @@ pub fn new_test_scene(manager: &mut IdManager) -> WEntity {
                 for x in -5..6 {
                     let coords = WCoords::new(x,y);
                     if x < 0 {
-                        let chunk = match new_chunk(manager, &chunk_renderable, zoom, &coords, match world.get_mut_entity_by_id(province2_id) {
-                            Some(province) => province,
-                            None => return Err(DorpErr::Base("World Get mut Entity by Id Province id was none")),
-                        }) {
+                        let chunk = match new_chunk(manager, &chunk_renderable, zoom, &coords, province2_id, world) {
                             Ok(chunk) => chunk,
                             Err(err) => return Err(DorpErr::Dorp("New Chunk", Box::new(err))),
                         };
                         world.add_entity(chunk);
                     } else {
-                        let chunk = match new_chunk(manager, &chunk_renderable, zoom, &coords, match world.get_mut_entity_by_id(province_id) {
-                            Some(province) => province,
-                            None => return Err(DorpErr::Base("World Get mut Entity by Id Province id was none")),
-                        }) {
+                        let chunk = match new_chunk(manager, &chunk_renderable, zoom, &coords, province_id, world) {
                             Ok(chunk) => chunk,
                             Err(err) => return Err(DorpErr::Dorp("New Chunk", Box::new(err))),
                         };

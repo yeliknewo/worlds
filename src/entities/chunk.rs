@@ -5,29 +5,35 @@ use dorp::{
 
 use dorp::graphics::solid_color::{Vertex};
 
-use core::{WEntity, WCoords};
+use core::{WEntity, WCoords, WWorld};
 use components::{Chunk};
 
-pub fn new_chunk(manager: &mut IdManager, renderable: &Renderable, zoom: Vec3, location: &WCoords, province_entity: &mut WEntity) -> Result<WEntity, DorpErr> {
+pub fn new_chunk(manager: &mut IdManager, renderable: &Renderable, zoom: Vec3, location: &WCoords, province_id: Id, world: &mut WWorld) -> Result<WEntity, DorpErr> {
     let id = Id::new(manager, IdType::Entity);
     let mut renderable = renderable.clone();
-    let province_id = province_entity.get_id();
-    let province = match province_entity.get_mut_province() {
-        Some(province) => province,
-        None => return Err(DorpErr::Base("Province Entity Get mut Province was none")),
+    let mut chunk = {
+        let mut province_entity = match world.get_mut_entity_by_id(province_id) {
+            Some(province_entity) => province_entity,
+            None => return Err(DorpErr::Base("World Get Entity by Id province id was none")),
+        };
+        let province_id = province_entity.get_id();
+        let province = match province_entity.get_mut_province() {
+            Some(province) => province,
+            None => return Err(DorpErr::Base("Province Entity Get mut Province was none")),
+        };
+        match renderable.get_mut_solid_color() {
+            Some(renderable) => {
+                renderable.set_model_id(Id::new(manager, IdType::Matrix));
+                renderable.set_model(Mat4::identity());
+                renderable.set_color_id(province.get_color_id());
+            },
+            None => return Err(DorpErr::Base("Get Mut Solid Color was none")),
+        }
+        Chunk::new(id, province_id, province)
     };
-    match renderable.get_mut_solid_color() {
-        Some(renderable) => {
-            renderable.set_model_id(Id::new(manager, IdType::Matrix));
-            renderable.set_model(Mat4::identity());
-            renderable.set_color_id(province.get_color_id());
-        },
-        None => return Err(DorpErr::Base("Get Mut Solid Color was none")),
-    }
     let mut transform = Transform::new();
     transform.set_position(Vec3::from([location.get_x() as f32, location.get_y() as f32, 0.0]) * zoom);
     transform.set_scalation(zoom);
-    let mut chunk = Chunk::new(id, province_id, province);
     chunk.add_neighbor_coords(WCoords::new(location.get_x() + 1, location.get_y()));
     chunk.add_neighbor_coords(WCoords::new(location.get_x() - 1, location.get_y()));
     chunk.add_neighbor_coords(WCoords::new(location.get_x(), location.get_y() + 1));

@@ -2,7 +2,7 @@
 name = "worlds"
 version = "0.1.0"
 dependencies = [
- "dorp 0.1.12 (git+https://github.com/yeliknewo/rs-dorp.git)",
+ "dorp 0.1.13 (git+https://github.com/yeliknewo/rs-dorp.git)",
  "rand 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -147,8 +147,8 @@ dependencies = [
 
 [[package]]
 name = "dorp"
-version = "0.1.12"
-source = "git+https://github.com/yeliknewo/rs-dorp.git#e7f811acce1c1b818228e0ba8c9757b9d1a332f2"
+version = "0.1.13"
+source = "git+https://github.com/yeliknewo/rs-dorp.git#ec3eb7b858e6cbddc66081a939ab78d854b6880e"
 dependencies = [
  "glium 0.13.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",

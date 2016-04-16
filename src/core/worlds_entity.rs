@@ -90,6 +90,14 @@ impl WEntity {
         self.province.as_ref()
     }
 
+    pub fn get_chunk(&self) -> Option<&Box<Chunk>> {
+        self.chunk.as_ref()
+    }
+
+    pub fn get_mut_wmap(&mut self) -> Option<&mut Box<WMap>> {
+        self.wmap.as_mut()
+    }
+
     pub fn get_mut_province(&mut self) -> Option<&mut Box<Province>> {
         self.province.as_mut()
     }

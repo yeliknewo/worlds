@@ -1,6 +1,6 @@
 use dorp::{Id, IdManager, IdType, Vec4, SyncData, DorpErr};
 
-use core::{WWorld};
+use core::{WWorld, WCoords};
 
 #[derive(Debug)]
 pub struct Province {
@@ -26,6 +26,30 @@ impl Province {
             color_id: id,
             dirty: false,
         }
+    }
+
+    pub fn get_chunks(&self) -> &Vec<Id> {
+        &self.chunks
+    }
+
+    pub fn get_empty_neighbors(&self, world: &WWorld) -> Result<Vec<WCoords>, DorpErr> {
+        let mut coords_vec = vec!();
+        for chunk_id in self.chunks.iter() {
+            match world.get_entity_by_id(*chunk_id) {
+                Some(chunk_entity) => {
+                    match chunk_entity.get_chunk() {
+                        Some(chunk) => {
+                            for coords in chunk.get_empty_neighbors().iter() {
+                                coords_vec.push(WCoords::new(coords.get_x(), coords.get_y()));
+                            }
+                        },
+                        None => return Err(DorpErr::Base("Chunk entity get chunk was none")),
+                    }
+                },
+                None => return Err(DorpErr::Base("World get entity by id chunk id was none")),
+            }
+        }
+        Ok(coords_vec)
     }
 
     pub fn tick_mut(&mut self, world: &mut WWorld) -> Result<(), DorpErr> {

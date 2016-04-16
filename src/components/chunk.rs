@@ -43,6 +43,10 @@ impl Chunk {
         }
     }
 
+    pub fn get_empty_neighbors(&self) -> &Vec<WCoords> {
+        &self.empty_neighbors
+    }
+
     pub fn add_neighbor_coords(&mut self, neighbor_coords: WCoords) {
         self.empty_neighbors.push(neighbor_coords);
     }
