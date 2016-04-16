@@ -6,7 +6,7 @@ use dorp::{
 };
 
 use core::{WScene, WWorld, WMap, WCoords};
-use components::{Chunk, Province};
+use components::{Chunk, Province, Overseer};
 
 pub struct WEntity {
     renderable: Option<Arc<Renderable>>,
@@ -17,6 +17,7 @@ pub struct WEntity {
     wcoords: Option<Arc<WCoords>>,
     chunk: Option<Arc<Chunk>>,
     province: Option<Arc<Province>>,
+    overseer: Option<Arc<Overseer>>,
     id: Id,
 }
 
@@ -31,6 +32,7 @@ impl WEntity {
             wcoords: None,
             chunk: None,
             province: None,
+            overseer: None,
             id: id,
         }
     }
@@ -73,6 +75,15 @@ impl WEntity {
     pub fn with_province(mut self, province: Province) -> WEntity {
         self.province = Some(Arc::new(province));
         self
+    }
+
+    pub fn with_overseer(mut self, overseer: Overseer) -> WEntity {
+        self.overseer = Some(Arc::new(overseer));
+        self
+    }
+
+    pub fn get_wmap(&self) -> Option<Arc<WMap>> {
+        self.wmap.clone()
     }
 
     pub fn get_province(&self) -> Option<Arc<Province>> {
@@ -118,6 +129,11 @@ impl Entity<WEntity> for WEntity {
 
     fn tick_mut(&mut self, tick_count: TickCount, manager: &mut IdManager, world: &mut WWorld, sync_data: &mut SyncData) -> Result<(), DorpErr> {
         let id = self.get_id();
+        if let Some(overseer) = self.overseer.as_mut() {
+            if let Some(overseer) = Arc::get_mut(overseer) {
+                overseer.tick_mut(tick_count);
+            }
+        }
         if let Some(scene) = self.scene.as_mut() {
             if let Some(scene) = Arc::get_mut(scene) {
                 if let Err(err) = scene.tick_mut(id, manager, world, sync_data) {
@@ -129,7 +145,7 @@ impl Entity<WEntity> for WEntity {
         }
         if let Some(province) = self.province.as_mut() {
             if let Some(province) = Arc::get_mut(province) {
-                if let Err(err) = province.tick_mut(world, sync_data) {
+                if let Err(err) = province.tick_mut(world) {
                     return Err(DorpErr::Dorp("Province Tick Mut", Box::new(err)));
                 }
             }

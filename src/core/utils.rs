@@ -10,4 +10,4 @@ pub type WWorld = World<WEntity>;
 pub type WMap = Map2d<WMapCoordSize>;
 pub type WCoords = Map2dCoords<WMapCoordSize>;
 pub type WMapCoordSize = i32;
-pub static WMAP_NAME: &'static str = "WMapName";
+pub static OVERSEER_NAME: &'static str = "Overseer";

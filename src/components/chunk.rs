@@ -5,6 +5,7 @@ use components::{Province};
 #[derive(Debug)]
 pub struct Chunk {
     province_id: Id,
+    neighbors: Vec<Id>,
 }
 
 impl Chunk {
@@ -12,6 +13,7 @@ impl Chunk {
         province.add_chunk(my_id);
         Chunk {
             province_id: province_id,
+            neighbors: vec!(),
         }
     }
 }

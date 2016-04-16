@@ -6,3 +6,6 @@ authors = ["Kiley Owen <yelikdev@gmail.com>"]
 [dependencies.dorp]
 git = "https://github.com/yeliknewo/rs-dorp.git"
 version = "*"
+
+[dependencies]
+rand = "0.3.14"

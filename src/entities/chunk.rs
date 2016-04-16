@@ -1,7 +1,7 @@
 use std::sync::{Arc};
 
 use dorp::{
-    Id, IdManager, IdType, Transform, Renderable, Mat4, Vec3, SyncData,
+    Id, IdManager, IdType, Transform, Renderable, Mat4, Vec3,
     DorpErr, Entity, OptErr
 };
 
@@ -10,7 +10,7 @@ use dorp::graphics::solid_color::{Vertex};
 use core::{WEntity, WCoords};
 use components::{Chunk};
 
-pub fn new_chunk(manager: &mut IdManager, renderable: Arc<Renderable>, location: Arc<WCoords>, province_entity: &mut WEntity, sync_data: &mut SyncData) -> Result<WEntity, DorpErr> {
+pub fn new_chunk(manager: &mut IdManager, renderable: Arc<Renderable>, zoom: Vec3, location: Arc<WCoords>, province_entity: &mut WEntity) -> Result<WEntity, DorpErr> {
     let id = Id::new(manager, IdType::Entity);
     let mut renderable = Renderable::new_from(renderable);
     let province_id = province_entity.get_id();
@@ -28,9 +28,8 @@ pub fn new_chunk(manager: &mut IdManager, renderable: Arc<Renderable>, location:
         None => return Err(DorpErr::Base("Get Mut Solid Color was none")),
     }
     let mut transform = Transform::new();
-    let scale = Vec3::from([0.1, 0.1, 0.1]);
-    transform.set_position(Vec3::from([location.get_x() as f32, location.get_y() as f32, 0.0]) * scale);
-    transform.set_scalation(scale);
+    transform.set_position(Vec3::from([location.get_x() as f32, location.get_y() as f32, 0.0]) * zoom);
+    transform.set_scalation(zoom);
     let chunk = Chunk::new(id, province_id, province);
     Ok(
         WEntity::new(id)

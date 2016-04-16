@@ -10,7 +10,7 @@ pub struct Province {
 }
 
 impl Province {
-    pub fn new(manager: &mut IdManager, color_id: Id) -> Province {
+    pub fn new(color_id: Id) -> Province {
         Province {
             chunks: vec!(),
             color_id: color_id,
@@ -28,7 +28,7 @@ impl Province {
         }
     }
 
-    pub fn tick_mut(&mut self, world: &mut WWorld, sync_data: &mut SyncData) -> Result<(), DorpErr> {
+    pub fn tick_mut(&mut self, world: &mut WWorld) -> Result<(), DorpErr> {
         if self.dirty {
             self.dirty = false;
             for chunk_id in self.chunks.iter() {
