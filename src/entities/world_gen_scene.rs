@@ -1,5 +1,3 @@
-use std::sync::{Arc};
-
 use rand::{Rng, thread_rng};
 
 use dorp::{
@@ -20,17 +18,15 @@ pub fn new_world_gen_scene(manager: &mut IdManager) -> WEntity {
                 Err(err) => return Err(DorpErr::Dorp("New Overseer", Box::new(err))),
             };
             let overseer_id = overseer.get_id();
-            if let Err(err) = world.add_entity(overseer) {
-                return Err(DorpErr::Dorp("World Add Entity", Box::new(err)));
-            }
+            world.add_entity(overseer);
             overseer_id
         };
-        let base = Arc::new(new_base(manager, world));
-        let chunk_renderable = Arc::new(match new_chunk_renderable(manager, base) {
+        let base = new_base(manager, world);
+        let chunk_renderable = match new_chunk_renderable(manager, &base) {
             Ok(renderable) => renderable,
             Err(err) => return Err(DorpErr::Dorp("new chunk renderable", Box::new(err))),
-        });
-        let mut coords = Arc::new(WCoords::new(0, 0));
+        };
+        let mut coords = WCoords::new(0, 0);
         let province_count = 1;
         for _ in 0..province_count {
             let mut province = new_province(Vec4::from([rng.gen_range::<f32>(0.0, 1.0), rng.gen_range::<f32>(0.0, 1.0), rng.gen_range::<f32>(0.0, 1.0), 1.0]), manager, sync_data);
@@ -45,21 +41,19 @@ pub fn new_world_gen_scene(manager: &mut IdManager) -> WEntity {
                 };
                 while wmap.get(coords.get_x(), coords.get_y()).is_some() {
                     coords = match rng.gen_range::<u8>(0, 4) {
-                        0 => Arc::new(WCoords::new(coords.get_x() + 1, coords.get_y())),
-                        1 => Arc::new(WCoords::new(coords.get_x() - 1, coords.get_y())),
-                        2 => Arc::new(WCoords::new(coords.get_x(), coords.get_y() + 1)),
-                        3 => Arc::new(WCoords::new(coords.get_x(), coords.get_y() - 1)),
+                        0 => WCoords::new(coords.get_x() + 1, coords.get_y()),
+                        1 => WCoords::new(coords.get_x() - 1, coords.get_y()),
+                        2 => WCoords::new(coords.get_x(), coords.get_y() + 1),
+                        3 => WCoords::new(coords.get_x(), coords.get_y() - 1),
                         _ => return Err(DorpErr::Base("Problem with rng")),
                     }
                 }
             }
-            let chunk = match new_chunk(manager, chunk_renderable.clone(), zoom, coords.clone(), &mut province) {
+            let chunk = match new_chunk(manager, &chunk_renderable, zoom, &coords, &mut province) {
                 Ok(chunk) => chunk,
                 Err(err) => return Err(DorpErr::Dorp("New Chunk", Box::new(err))),
             };
-            if let Err(err) = world.add_entity(chunk) {
-                return Err(DorpErr::Dorp("World Add Entity", Box::new(err)));
-            }
+            world.add_entity(chunk);
         }
         println!("World Gen Scene Loaded");
         Ok(())

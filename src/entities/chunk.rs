@@ -1,8 +1,6 @@
-use std::sync::{Arc};
-
 use dorp::{
     Id, IdManager, IdType, Transform, Renderable, Mat4, Vec3,
-    DorpErr, Entity, OptErr
+    DorpErr, Entity
 };
 
 use dorp::graphics::solid_color::{Vertex};
@@ -10,14 +8,13 @@ use dorp::graphics::solid_color::{Vertex};
 use core::{WEntity, WCoords};
 use components::{Chunk};
 
-pub fn new_chunk(manager: &mut IdManager, renderable: Arc<Renderable>, zoom: Vec3, location: Arc<WCoords>, province_entity: &mut WEntity) -> Result<WEntity, DorpErr> {
+pub fn new_chunk(manager: &mut IdManager, renderable: &Renderable, zoom: Vec3, location: &WCoords, province_entity: &mut WEntity) -> Result<WEntity, DorpErr> {
     let id = Id::new(manager, IdType::Entity);
-    let mut renderable = Renderable::new_from(renderable);
+    let mut renderable = renderable.clone();
     let province_id = province_entity.get_id();
     let province = match province_entity.get_mut_province() {
-        OptErr::Full(province) => province,
-        OptErr::Empty => return Err(DorpErr::Base("Province Entity Get mut Province was none")),
-        OptErr::Error(err) => return Err(DorpErr::Dorp("Province Entity Get Mut Province", Box::new(err))),
+        Some(province) => province,
+        None => return Err(DorpErr::Base("Province Entity Get mut Province was none")),
     };
     match renderable.get_mut_solid_color() {
         Some(renderable) => {
@@ -39,8 +36,8 @@ pub fn new_chunk(manager: &mut IdManager, renderable: Arc<Renderable>, zoom: Vec
     )
 }
 
-pub fn new_chunk_renderable(manager: &mut IdManager, base: Arc<Renderable>) -> Result<Renderable, DorpErr> {
-    let mut renderable = Renderable::new_from(base);
+pub fn new_chunk_renderable(manager: &mut IdManager, base: &Renderable) -> Result<Renderable, DorpErr> {
+    let mut renderable = base.clone();
     {
         let mut solid_color = match renderable.get_mut_solid_color() {
             Some(solid_color) => solid_color,

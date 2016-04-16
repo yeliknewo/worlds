@@ -21,7 +21,7 @@ fn main() {
     let mut game = WGame::new(thread_count, Vec2::from([resolution.0 as f32, resolution.1 as f32]));
     // let scene = entities::new_test_scene(&mut manager);
     let scene = entities::new_world_gen_scene(&mut manager);
-    game.get_mut_world().unwrap().add_entity(scene).unwrap();
+    game.get_mut_world().unwrap().add_entity(scene);
     println!("Starting Run Loop");
     game.run(&mut window, &mut manager).unwrap();
 }

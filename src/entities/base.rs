@@ -1,4 +1,3 @@
-
 use dorp::{IdManager, Renderable, RenderableSolidColor, Mat4};
 use dorp::graphics::solid_color::{DrawMethod, DepthTestMethod, CullingMethod};
 
